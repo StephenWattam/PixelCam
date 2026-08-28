@@ -16,7 +16,27 @@ static void on_capture(lv_event_t * e) {
 }
 
 static void on_usb(lv_event_t* e) {
-  ((Arduino_ST7789*)gfx)->displayOff();
+  //Show a clear status screen before we hand the display's SPI bus over to the
+  //SD card / USB, so it's obvious the camera is busy connecting. We deliberately
+  //do NOT call displayOff() - the ST7789 keeps showing this last frame from its
+  //own GRAM after we stop driving it.
+  lv_obj_t* usb_scr = lv_obj_create(NULL);
+  lv_obj_set_style_bg_color(usb_scr, lv_color_black(), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(usb_scr, LV_OPA_COVER, LV_PART_MAIN);
+  lv_obj_set_style_text_color(usb_scr, lv_color_white(), LV_PART_MAIN);
+
+  lv_obj_t* usb_title = lv_label_create(usb_scr);
+  lv_obj_set_style_text_font(usb_title, &lv_font_montserrat_28, LV_PART_MAIN);
+  lv_label_set_text(usb_title, "USB Mass Storage");
+  lv_obj_align(usb_title, LV_ALIGN_CENTER, 0, -15);
+
+  lv_obj_t* usb_sub = lv_label_create(usb_scr);
+  lv_label_set_text(usb_sub, "Connecting... eject/unmount to return");
+  lv_obj_align(usb_sub, LV_ALIGN_CENTER, 0, 20);
+
+  lv_scr_load(usb_scr);
+  lv_refr_now(NULL);  //flush it to the panel now, while we still drive the LCD
+
   lvgl_lock(-1);
   bus->endWrite();
   digitalWrite(PIN_NUM_LCD_CS, HIGH);
