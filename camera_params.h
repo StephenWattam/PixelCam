@@ -216,7 +216,7 @@ static void init_settings_page() {
   load_settings();
 
   lv_obj_t* list = lv_list_create(ui_pages[UIScreen::CAMERA_PARAMS]);
-  lv_obj_set_size(list, LCD_H_RES, LCD_V_RES);
+  lv_obj_set_size(list, SCREEN_W, SCREEN_H);
   lv_obj_center(list);
   lv_obj_set_style_pad_row(list, 10, 00);
   lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLL_MOMENTUM);
@@ -230,7 +230,7 @@ static void init_settings_page() {
 
   lv_obj_t * slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,-5,5);
   lv_slider_set_value(slider, (int)info->status.ae_level, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_ae_lvl, LV_EVENT_VALUE_CHANGED, NULL);
@@ -248,7 +248,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,0,64);
   lv_slider_set_value(slider, (int)info->status.agc_gain, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_ag_lvl, LV_EVENT_VALUE_CHANGED, NULL);
@@ -265,7 +265,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,-3,3);
   lv_slider_set_value(slider, (int)info->status.brightness, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_brightness, LV_EVENT_VALUE_CHANGED, NULL);
@@ -276,7 +276,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,-3,3);
   lv_slider_set_value(slider, (int)info->status.contrast, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_contrast, LV_EVENT_VALUE_CHANGED, NULL);
@@ -287,7 +287,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,-4,4);
   lv_slider_set_value(slider, (int)info->status.saturation, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_saturation, LV_EVENT_VALUE_CHANGED, NULL);
@@ -298,7 +298,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,-3,3);
   lv_slider_set_value(slider, (int)info->status.sharpness, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_sharpness, LV_EVENT_VALUE_CHANGED, NULL);
@@ -309,7 +309,7 @@ static void init_settings_page() {
 
   slider = lv_slider_create(list);
   lv_obj_center(slider);
-  lv_obj_set_size(slider, LCD_H_RES-20, 10);
+  lv_obj_set_size(slider, SCREEN_W-20, 10);
   lv_slider_set_range(slider,0,4);
   lv_slider_set_value(slider, (int)info->status.wb_mode, LV_ANIM_OFF);
   lv_obj_add_event_cb(slider, on_wb, LV_EVENT_VALUE_CHANGED, NULL);

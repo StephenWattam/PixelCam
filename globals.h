@@ -42,7 +42,7 @@
 #define PIN_NUM_LCD_BL 1
 #define PIN_NUM_TP_SDA 48
 #define PIN_NUM_TP_SCL 47
-#define LCD_ROTATION 0
+#define LCD_ROTATION 1
 #define LEDC_FREQ 5000
 #define LEDC_TIMER_10_BIT 10
 
@@ -52,6 +52,18 @@
 //Camera Res
 #define QVGA_W 240
 #define QVGA_H 176
+
+//Logical (orientation-aware) UI dimensions
+#if (LCD_ROTATION == 1) || (LCD_ROTATION == 3)
+  #define SCREEN_W LCD_V_RES   // 320
+  #define SCREEN_H LCD_H_RES   // 240
+#else
+  #define SCREEN_W LCD_H_RES
+  #define SCREEN_H LCD_V_RES
+#endif
+
+//Preview zoom factor (256 = 1x). Scales QVGA_W up to fill SCREEN_W.
+#define PREVIEW_ZOOM (SCREEN_W * 256 / QVGA_W)
 
 //mutex for lvgl's render loop
 static SemaphoreHandle_t lvgl_api_mux = NULL;

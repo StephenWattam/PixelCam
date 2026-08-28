@@ -88,3 +88,5 @@ Outstanding items:
  5. A physical speaker or LED to show when the camera takes a photo
  6. Fancy case with tripod mount, perhaps a viewfinder
  7. Assembly guide with photos
+ 8. A 'busy' icon for when the camera is processing (photo, or loading a palette)
+ 9. Correctly reset on USB disconnect

@@ -56,9 +56,9 @@ void my_print(const char *buf) {
 /* Display flushing */
 void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
 #if (LV_COLOR_16_SWAP != 0)
-  gfx->draw16bitBeRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, LCD_H_RES, LCD_V_RES);
+  gfx->draw16bitBeRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, gfx->width(), gfx->height());
 #else
-  gfx->draw16bitRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, LCD_H_RES, LCD_V_RES);
+  gfx->draw16bitRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, gfx->width(), gfx->height());
 #endif
   lv_disp_flush_ready(disp_drv);
 }
@@ -85,6 +85,9 @@ void lvgl_camera_ui_init(lv_obj_t *parent) {
   lv_obj_align(img_camera, LV_ALIGN_CENTER, 0, 0);
   lv_obj_set_pos(img_camera, 0, 0);
   lv_obj_set_scroll_dir(parent, LV_DIR_NONE);
+
+  lv_img_set_pivot(img_camera, QVGA_W/2, QVGA_H/2);
+  lv_img_set_zoom(img_camera, PREVIEW_ZOOM);
 
   lv_obj_set_style_pad_top(img_camera, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_bottom(img_camera, 0, LV_PART_MAIN);

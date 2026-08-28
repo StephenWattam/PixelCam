@@ -25,7 +25,7 @@ static void init_palette_ui() {
   sd_activate();
 
   lv_obj_t* list = lv_list_create(ui_pages[UIScreen::PALETTE_LIST]);
-  lv_obj_set_size(list, LCD_H_RES, LCD_V_RES);
+  lv_obj_set_size(list, SCREEN_W, SCREEN_H);
   lv_obj_center(list);
 
   const char* path = "/palette/";
@@ -122,8 +122,8 @@ static void init_main_page() {
 
   palette_label = lv_label_create(ui_pages[UIScreen::MAIN]);
   lv_label_set_text(palette_label, "");
-  /*Position the main label*/
-  lv_obj_align(palette_label, LV_ALIGN_CENTER, 0, -100);
+  /*Position below the top row of buttons so it doesn't overlap the USB button*/
+  lv_obj_align(palette_label, LV_ALIGN_TOP_MID, 0, 45);
 }
 
 
