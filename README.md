@@ -1,6 +1,7 @@
-Heavily inspired by the [Pixless Camera](https://www.kickstarter.com/projects/carloandreini/pixless-camera), the Pixel Art Camera is a portable ‘toy’ camera that takes lo-resolution photos and posterizes the pixel colors to a small limited color palette, typically used for pixel art. This creates photos that resemble retro pixel art.
+# Pixel Camera
+This project is a small ESP32-based camera that takes pixel art photos.  It's based on the work by [Benedict Lee](https://parallelsuns.com/pixel-art-camera/), with a few tweaks to make it into something I wanted to build.
 
-The camera supports .hex color palette files downloadable from https://lospec.com/palette-list.
+Heavily inspired by the [Pixless Camera](https://www.kickstarter.com/projects/carloandreini/pixless-camera), the Pixel Art Camera is a portable ‘toy’ camera that takes lo-resolution photos and posterizes the pixel colors to a small limited color palette, typically used for pixel art. This creates photos that resemble retro pixel art.
 
 The camera is built with a Waveshare ESP32-S3-Touch-LCD-2 development board, an OV5640 camera module and a 400 mAh Li-Po battery with a 3d printed enclosure.
 
@@ -10,23 +11,30 @@ The code isn't very clean as this was just a fun side-project. You have been war
 
 Also, I did not bother with computing an accurate battery percentage based on the discharge curve or anything so the battery percentage indicator is VERY VERY approximate.
 
+## Colour Profiles
+The camera supports .hex color palette files downloadable from https://lospec.com/palette-list.  Some are included in the [sd_card_root](sd_card_root) folder to get you going.
+
 ## Usage Instructions
 
-See https://github.com/parallelsuns/PixelArtCamera/blob/main/User_Manual.md
+See [User_Manual.md](User_Manual.md).
+
+## Prerequisites
+
+- **[arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/)** — drives the compile/flash. On macOS: `brew install arduino-cli`. On Linux: see the install script on the linked page. On Windows: `winget install ArduinoSA.CLI` (or use WSL).
+- **make** — runs the provided targets. Preinstalled on macOS (via the Xcode Command Line Tools) and most Linux distros; on Windows use WSL or Git Bash with `choco install make`.
+
+The ESP32 Arduino core is then installed with `make setup` (see below) — you do **not** need the Arduino IDE.
 
 ## Building
 
-Set up the ESP32 build environment following Waveshare's instructions here: https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-2#Environment_Setup. Ensure you are able to build the example projects provided.
-
-Install the **LVGL 8.4.0** library via the Arduino IDE Library Manager (or `arduino-cli lib install "lvgl@8.4.0"`). The other two libraries (`bsp_cst816` and `Arduino_GFX`) are bundled in the [`libraries/`](libraries) folder of this repo, so you don't need to install them separately.
-
-This project is tested against **ESP32 Arduino core 3.3.11**.
+This repo is self-contained: **all three libraries (LVGL, Arduino_GFX, bsp_cst816) are bundled** in the [`libraries/`](libraries) folder and pulled in automatically by the build, so there is nothing to install via the Arduino Library Manager. The only external requirement is the ESP32 Arduino platform itself (pinned to **core 3.3.11**).
 
 ### Option A: Command line with the Makefile (recommended)
 
-A `Makefile` is provided that drives [`arduino-cli`](https://arduino.github.io/arduino-cli/). It automatically points the compiler at the bundled `bsp_cst816` and `Arduino_GFX` libraries.
+A `Makefile` is provided that drives [`arduino-cli`](https://arduino.github.io/arduino-cli/). It points the compiler at the bundled libraries, so a clean checkout compiles with no extra configuration.
 
 ```sh
+make setup          # one-time: install the pinned ESP32 core (3.3.11)
 make build          # compile only
 make ports          # list connected boards / serial ports
 make flash          # compile and upload (auto-detects the ESP32 port)
@@ -34,21 +42,27 @@ make monitor        # open the serial monitor (115200 baud)
 make clean          # remove build artifacts
 ```
 
+`make setup` only needs to be run once per machine (it installs `esp32:esp32@3.3.11` from Espressif's package index). After that, `make build` / `make flash` work against a fresh clone with no Library Manager steps.
+
 The serial port is auto-detected from `arduino-cli board list`. If you have more than one ESP32 attached (or detection fails), pass it explicitly, e.g. `make flash PORT=/dev/cu.usbmodem1101`.
 
 Run `make help` to see all targets. The board (`FQBN`) defaults to `esp32:esp32:esp32s3:PSRAM=opi,FlashSize=16M,CDCOnBoot=cdc` and can be overridden on the command line.
 
 ### Option B: Arduino IDE
 
-Build using Arduino IDE 2.3.6. Copy (or symlink) the bundled `libraries/bsp_cst816` and `libraries/GFX_Library_for_Arduino` folders into your Arduino `libraries` directory, select the **ESP32S3 Dev Module** board with PSRAM enabled (OPI), and compile as usual.
+Build using Arduino IDE 2.3.6. Copy (or symlink) the bundled `libraries/lvgl`, `libraries/GFX_Library_for_Arduino`, and `libraries/bsp_cst816` folders into your Arduino `libraries` directory, install the ESP32 boards package (core 3.3.11), select the **ESP32S3 Dev Module** board with PSRAM enabled (OPI), and compile as usual.
 
 ## Requirements
 
-| Library                                                                                     | Version | Remarks                                                                                     |
-| ------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| [LVGL](https://lvgl.io/)                                                                    | 8.4.0   | Install via the Arduino Library Manager.                                                     |
-| [GFX Library for Arduino](https://github.com/moononournation/Arduino_GFX)                  | 1.6.7   | Bundled in [`libraries/`](libraries). 1.6.7+ is required for ESP32 core 3.x.                |
-| [bsp_cst816](https://drive.google.com/drive/folders/1Pcs_A4FKWvdSHnz9lEBYqOpr-noTMbIv)      | N.A.    | Bundled in [`libraries/`](libraries). Not available in the Library Manager; from Waveshare. |
+Everything below is bundled in [`libraries/`](libraries) — no separate installation is required.
+
+| Library                                                                                     | Version | Remarks                                                              |
+| ------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------- |
+| [LVGL](https://lvgl.io/)                                                                    | 8.4.0   | Bundled. `lv_conf.h` lives in the repo root.                         |
+| [GFX Library for Arduino](https://github.com/moononournation/Arduino_GFX)                  | 1.6.7   | Bundled. 1.6.7+ is required for ESP32 core 3.x.                      |
+| [bsp_cst816](https://drive.google.com/drive/folders/1Pcs_A4FKWvdSHnz9lEBYqOpr-noTMbIv)      | N.A.    | Bundled. Not available in the Library Manager; provided by Waveshare. |
+
+The ESP32 Arduino core (**3.3.11**) is the only external dependency; install it with `make setup`.
 
 ## BOM
 
@@ -60,12 +74,17 @@ Build using Arduino IDE 2.3.6. Copy (or symlink) the bundled `libraries/bsp_cst8
 | SPST Rocker Switch (mounting hole 13x9mm)                | https://www.amazon.com/DIYhz-Environmental-Protection-Electrical-Products/dp/B07BPKZ2RG                                              | Switch should match given mounting dimensions to work with the 3d printed case STL                                    |
 | 3d Printed Enclosure                                     | https://github.com/parallelsuns/PixelArtCamera/blob/main/PixelArtCamera_enclosure.stl                                                | PLA 15% infill should work just fine                                                                                  |
 
-## Assembly
+## Assembly & Setup
 
-1. Print 3d printed enclosure.
-2. Mount the rocker switch into case.
-3. Insert battery into the compartment in the case.
-4. Cut 1 lead from the battery and solder the rocker switch in between the 2 halves.
-5. Connect the battery to VBAT and G on the ESP32 board.
-6. Slide the board into the enclosure. Secure it with adhesive/screws.
-7. Compile the firmware and flash it via USB.
+See [ASSEMBLY_GUIDE](ASSEMBLY_GUIDE.md) for a step-by-step guide.
+
+## Further Work
+Outstanding items:
+
+ 1. Horizontal orientation for the software
+ 2. Wifi or bluetooth file-transfer to a phone or computer
+ 3. Better battery percentage calculation
+ 4. A physical shutter button on the GPIO pins
+ 5. A physical speaker or LED to show when the camera takes a photo
+ 6. Fancy case with tripod mount, perhaps a viewfinder
+ 7. Assembly guide with photos
