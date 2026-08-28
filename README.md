@@ -1,6 +1,7 @@
-Heavily inspired by the [Pixless Camera](https://www.kickstarter.com/projects/carloandreini/pixless-camera), the Pixel Art Camera is a portable ‘toy’ camera that takes lo-resolution photos and posterizes the pixel colors to a small limited color palette, typically used for pixel art. This creates photos that resemble retro pixel art.
+# Pixel Camera
+This project is a small ESP32-based camera that takes pixel art photos.  It's based on the work by [Benedict Lee](https://parallelsuns.com/pixel-art-camera/), with a few tweaks to make it into something I wanted to build.
 
-The camera supports .hex color palette files downloadable from https://lospec.com/palette-list.
+Heavily inspired by the [Pixless Camera](https://www.kickstarter.com/projects/carloandreini/pixless-camera), the Pixel Art Camera is a portable ‘toy’ camera that takes lo-resolution photos and posterizes the pixel colors to a small limited color palette, typically used for pixel art. This creates photos that resemble retro pixel art.
 
 The camera is built with a Waveshare ESP32-S3-Touch-LCD-2 development board, an OV5640 camera module and a 400 mAh Li-Po battery with a 3d printed enclosure.
 
@@ -10,13 +11,14 @@ The code isn't very clean as this was just a fun side-project. You have been war
 
 Also, I did not bother with computing an accurate battery percentage based on the discharge curve or anything so the battery percentage indicator is VERY VERY approximate.
 
+## Colour Profiles
+The camera supports .hex color palette files downloadable from https://lospec.com/palette-list.  Some are included in the [sd_card_root](sd_card_root) folder to get you going.
+
 ## Usage Instructions
 
-See https://github.com/parallelsuns/PixelArtCamera/blob/main/User_Manual.md
+See [User_Manual.md](User_Manual.md).
 
 ## Prerequisites
-
-You only need two host tools (plus `git` to clone the repo):
 
 - **[arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/)** — drives the compile/flash. On macOS: `brew install arduino-cli`. On Linux: see the install script on the linked page. On Windows: `winget install ArduinoSA.CLI` (or use WSL).
 - **make** — runs the provided targets. Preinstalled on macOS (via the Xcode Command Line Tools) and most Linux distros; on Windows use WSL or Git Bash with `choco install make`.
@@ -72,12 +74,17 @@ The ESP32 Arduino core (**3.3.11**) is the only external dependency; install it 
 | SPST Rocker Switch (mounting hole 13x9mm)                | https://www.amazon.com/DIYhz-Environmental-Protection-Electrical-Products/dp/B07BPKZ2RG                                              | Switch should match given mounting dimensions to work with the 3d printed case STL                                    |
 | 3d Printed Enclosure                                     | https://github.com/parallelsuns/PixelArtCamera/blob/main/PixelArtCamera_enclosure.stl                                                | PLA 15% infill should work just fine                                                                                  |
 
-## Assembly
+## Assembly & Setup
 
-1. Print 3d printed enclosure.
-2. Mount the rocker switch into case.
-3. Insert battery into the compartment in the case.
-4. Cut 1 lead from the battery and solder the rocker switch in between the 2 halves.
-5. Connect the battery to VBAT and G on the ESP32 board.
-6. Slide the board into the enclosure. Secure it with adhesive/screws.
-7. Compile the firmware and flash it via USB.
+See [ASSEMBLY_GUIDE](ASSEMBLY_GUIDE.md) for a step-by-step guide.
+
+## Further Work
+Outstanding items:
+
+ 1. Horizontal orientation for the software
+ 2. Wifi or bluetooth file-transfer to a phone or computer
+ 3. Better battery percentage calculation
+ 4. A physical shutter button on the GPIO pins
+ 5. A physical speaker or LED to show when the camera takes a photo
+ 6. Fancy case with tripod mount, perhaps a viewfinder
+ 7. Assembly guide with photos
