@@ -12,9 +12,10 @@
 #   make flash PORT=/dev/cu.usbmodem1101
 #
 # Notes:
-#   * LVGL 8.4.0 must be installed via the Arduino Library Manager (see README).
-#   * bsp_cst816 and Arduino_GFX 1.6.7 are bundled in ./libraries and pulled in
-#     automatically below (Arduino_GFX 1.6.7 is required for ESP32 core 3.x).
+#   * All libraries (LVGL, Arduino_GFX, bsp_cst816) are bundled in ./libraries
+#     and pulled in automatically below, so nothing needs to be installed via the
+#     Arduino Library Manager.
+#   * Run `make setup` once to install the exact ESP32 core this project targets.
 
 # ---- Configuration (override on the command line, e.g. `make build FQBN=...`) ----
 SKETCH       ?= PixelArtCamera.ino
@@ -24,10 +25,15 @@ PORT         ?=
 MONITOR_BAUD ?= 115200
 ARDUINO_CLI  ?= arduino-cli
 
-# Bundled libraries that are not available through the Arduino Library Manager.
+# ESP32 platform pinned for reproducible builds (installed by `make setup`).
+ESP32_CORE_VERSION ?= 3.3.11
+ESP32_INDEX_URL    ?= https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+# All libraries are bundled in ./libraries so the repo is self-contained.
 LIBRARIES := \
-	--library libraries/bsp_cst816 \
-	--library libraries/GFX_Library_for_Arduino
+	--library libraries/lvgl \
+	--library libraries/GFX_Library_for_Arduino \
+	--library libraries/bsp_cst816
 
 # Resolve the serial port into the shell variable $PORT: use $(PORT) if the user
 # set it, otherwise auto-detect the first ESP32 board from `arduino-cli board list`.
@@ -45,9 +51,14 @@ if [ -z "$$PORT" ]; then \
 fi
 endef
 
-.PHONY: all build rebuild flash upload monitor ports clean help
+.PHONY: all setup build rebuild flash upload monitor ports clean help
 
 all: build
+
+## setup: Install the pinned ESP32 core (run once on a fresh machine)
+setup:
+	$(ARDUINO_CLI) core update-index --additional-urls $(ESP32_INDEX_URL)
+	$(ARDUINO_CLI) core install esp32:esp32@$(ESP32_CORE_VERSION) --additional-urls $(ESP32_INDEX_URL)
 
 ## build: Compile the sketch into $(BUILD_DIR)
 build:

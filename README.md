@@ -14,19 +14,25 @@ Also, I did not bother with computing an accurate battery percentage based on th
 
 See https://github.com/parallelsuns/PixelArtCamera/blob/main/User_Manual.md
 
+## Prerequisites
+
+You only need two host tools (plus `git` to clone the repo):
+
+- **[arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/)** — drives the compile/flash. On macOS: `brew install arduino-cli`. On Linux: see the install script on the linked page. On Windows: `winget install ArduinoSA.CLI` (or use WSL).
+- **make** — runs the provided targets. Preinstalled on macOS (via the Xcode Command Line Tools) and most Linux distros; on Windows use WSL or Git Bash with `choco install make`.
+
+The ESP32 Arduino core is then installed with `make setup` (see below) — you do **not** need the Arduino IDE.
+
 ## Building
 
-Set up the ESP32 build environment following Waveshare's instructions here: https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-2#Environment_Setup. Ensure you are able to build the example projects provided.
-
-Install the **LVGL 8.4.0** library via the Arduino IDE Library Manager (or `arduino-cli lib install "lvgl@8.4.0"`). The other two libraries (`bsp_cst816` and `Arduino_GFX`) are bundled in the [`libraries/`](libraries) folder of this repo, so you don't need to install them separately.
-
-This project is tested against **ESP32 Arduino core 3.3.11**.
+This repo is self-contained: **all three libraries (LVGL, Arduino_GFX, bsp_cst816) are bundled** in the [`libraries/`](libraries) folder and pulled in automatically by the build, so there is nothing to install via the Arduino Library Manager. The only external requirement is the ESP32 Arduino platform itself (pinned to **core 3.3.11**).
 
 ### Option A: Command line with the Makefile (recommended)
 
-A `Makefile` is provided that drives [`arduino-cli`](https://arduino.github.io/arduino-cli/). It automatically points the compiler at the bundled `bsp_cst816` and `Arduino_GFX` libraries.
+A `Makefile` is provided that drives [`arduino-cli`](https://arduino.github.io/arduino-cli/). It points the compiler at the bundled libraries, so a clean checkout compiles with no extra configuration.
 
 ```sh
+make setup          # one-time: install the pinned ESP32 core (3.3.11)
 make build          # compile only
 make ports          # list connected boards / serial ports
 make flash          # compile and upload (auto-detects the ESP32 port)
@@ -34,21 +40,27 @@ make monitor        # open the serial monitor (115200 baud)
 make clean          # remove build artifacts
 ```
 
+`make setup` only needs to be run once per machine (it installs `esp32:esp32@3.3.11` from Espressif's package index). After that, `make build` / `make flash` work against a fresh clone with no Library Manager steps.
+
 The serial port is auto-detected from `arduino-cli board list`. If you have more than one ESP32 attached (or detection fails), pass it explicitly, e.g. `make flash PORT=/dev/cu.usbmodem1101`.
 
 Run `make help` to see all targets. The board (`FQBN`) defaults to `esp32:esp32:esp32s3:PSRAM=opi,FlashSize=16M,CDCOnBoot=cdc` and can be overridden on the command line.
 
 ### Option B: Arduino IDE
 
-Build using Arduino IDE 2.3.6. Copy (or symlink) the bundled `libraries/bsp_cst816` and `libraries/GFX_Library_for_Arduino` folders into your Arduino `libraries` directory, select the **ESP32S3 Dev Module** board with PSRAM enabled (OPI), and compile as usual.
+Build using Arduino IDE 2.3.6. Copy (or symlink) the bundled `libraries/lvgl`, `libraries/GFX_Library_for_Arduino`, and `libraries/bsp_cst816` folders into your Arduino `libraries` directory, install the ESP32 boards package (core 3.3.11), select the **ESP32S3 Dev Module** board with PSRAM enabled (OPI), and compile as usual.
 
 ## Requirements
 
-| Library                                                                                     | Version | Remarks                                                                                     |
-| ------------------------------------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------- |
-| [LVGL](https://lvgl.io/)                                                                    | 8.4.0   | Install via the Arduino Library Manager.                                                     |
-| [GFX Library for Arduino](https://github.com/moononournation/Arduino_GFX)                  | 1.6.7   | Bundled in [`libraries/`](libraries). 1.6.7+ is required for ESP32 core 3.x.                |
-| [bsp_cst816](https://drive.google.com/drive/folders/1Pcs_A4FKWvdSHnz9lEBYqOpr-noTMbIv)      | N.A.    | Bundled in [`libraries/`](libraries). Not available in the Library Manager; from Waveshare. |
+Everything below is bundled in [`libraries/`](libraries) — no separate installation is required.
+
+| Library                                                                                     | Version | Remarks                                                              |
+| ------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------- |
+| [LVGL](https://lvgl.io/)                                                                    | 8.4.0   | Bundled. `lv_conf.h` lives in the repo root.                         |
+| [GFX Library for Arduino](https://github.com/moononournation/Arduino_GFX)                  | 1.6.7   | Bundled. 1.6.7+ is required for ESP32 core 3.x.                      |
+| [bsp_cst816](https://drive.google.com/drive/folders/1Pcs_A4FKWvdSHnz9lEBYqOpr-noTMbIv)      | N.A.    | Bundled. Not available in the Library Manager; provided by Waveshare. |
+
+The ESP32 Arduino core (**3.3.11**) is the only external dependency; install it with `make setup`.
 
 ## BOM
 
