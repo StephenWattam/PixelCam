@@ -70,9 +70,16 @@ static void init_palette_ui() {
     lv_obj_t* btn = lv_btn_create(list);
     lv_obj_align(btn, LV_ALIGN_LEFT_MID,0,0);
     lv_obj_add_event_cb(btn, on_choose_palette, LV_EVENT_CLICKED, NULL);
+    //keep the real filename (with extension) for loading; the label below
+    //shows it without a trailing ".hex"
+    lv_obj_set_user_data(btn, strdup(base));
 
     lv_obj_t * label = lv_label_create(btn);
-    lv_label_set_text(label, file.name());
+    char disp[256];
+    strncpy(disp, base, sizeof(disp) - 1);
+    disp[sizeof(disp) - 1] = 0;
+    strip_hex_ext(disp);
+    lv_label_set_text(label, disp);
 
     file.close();
   }

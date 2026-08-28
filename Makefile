@@ -36,17 +36,25 @@ LIBRARIES := \
 	--library libraries/bsp_cst816
 
 # Resolve the serial port into the shell variable $PORT: use $(PORT) if the user
-# set it, otherwise auto-detect the first ESP32 board from `arduino-cli board list`.
+# set it, otherwise auto-detect. First ask arduino-cli for a board it identifies
+# as an ESP32; if that fails (native-USB S3 boards often enumerate as "Unknown"
+# with no FQBN), fall back to the first plausible USB serial device.
 define resolve_port
 PORT="$(PORT)"; \
 if [ -z "$$PORT" ]; then \
-	PORT=$$($(ARDUINO_CLI) board list | awk 'tolower($$0) ~ /esp32/ && $$1 != "" && $$1 != "Port" { print $$1; exit }'); \
+	PORT=$$($(ARDUINO_CLI) board list | awk 'tolower($$0) ~ /esp32/ && $$1 ~ /^\/dev\// { print $$1; exit }'); \
 	if [ -n "$$PORT" ]; then echo "Auto-detected ESP32 port: $$PORT"; fi; \
+fi; \
+if [ -z "$$PORT" ]; then \
+	PORT=$$(ls /dev/cu.usbmodem* /dev/cu.usbserial* /dev/cu.wchusbserial* /dev/ttyACM* /dev/ttyUSB* 2>/dev/null | head -n1); \
+	if [ -n "$$PORT" ]; then echo "No board identified by arduino-cli; falling back to serial device: $$PORT"; fi; \
 fi; \
 if [ -z "$$PORT" ]; then \
 	echo "ERROR: could not auto-detect an ESP32 serial port."; \
 	echo "  Run 'make ports' to list ports, then pass it explicitly, e.g.:"; \
 	echo "  make $(or $(MAKECMDGOALS),flash) PORT=/dev/cu.usbmodem1101"; \
+	echo "  If nothing appears, reset the board (or enter download mode:"; \
+	echo "  hold BOOT, tap RESET, release BOOT) and try again."; \
 	exit 1; \
 fi
 endef

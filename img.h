@@ -6,11 +6,26 @@
 
 static bool load_palette(const char* path);
 
+//strips a trailing ".hex" (case-insensitive) extension in place
+static void strip_hex_ext(char* name) {
+  char* dot = strrchr(name, '.');
+  if (dot && (dot[1] == 'h' || dot[1] == 'H')
+          && (dot[2] == 'e' || dot[2] == 'E')
+          && (dot[3] == 'x' || dot[3] == 'X')
+          && dot[4] == 0) {
+    *dot = 0;
+  }
+}
+
 static void on_choose_palette(lv_event_t* e) {
   char path[256];
   lv_obj_t* btn = lv_event_get_target(e);
+  //the real filename (with extension) is stashed on the button; the visible
+  //label has ".hex" stripped, so we can't rebuild the path from the label.
+  const char* fname = (const char*)lv_obj_get_user_data(btn);
+  if (!fname) return;
   strcpy(path, "/palette/");
-  strcat(path, lv_label_get_text(lv_obj_get_child(btn,0)));
+  strcat(path, fname);
   Serial.println("Load Palette: ");
   Serial.println(path);
   load_palette(path);
@@ -74,6 +89,7 @@ static bool load_palette(const char* path) {
   size_t disp_len = strlen(disp);
   memcpy(curr_palette.name, disp, disp_len);
   curr_palette.name[disp_len] = 0;
+  strip_hex_ext(curr_palette.name);
   lv_label_set_text(palette_label, curr_palette.name);
 
   save_to_sd((const uint8_t*)path, strlen(path), "/last_palette");
