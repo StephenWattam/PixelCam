@@ -298,6 +298,7 @@ void setup() {
   
   init_main_page();
   init_palette();
+  seed_default_palettes();
   init_palette_ui();
   load_last_palette();
   find_next_file_index();
@@ -315,6 +316,11 @@ void setup() {
 }
 
 void loop() {
+  if (usb_reset_requested) {
+    //let the USB host finish the eject/unmount before we drop off the bus
+    delay(300);
+    ESP.restart();
+  }
   if (lvgl_lock(-1)) {
     lv_timer_handler(); /* let the fxUI do its work */
     lvgl_unlock();

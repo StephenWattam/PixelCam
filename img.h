@@ -68,13 +68,15 @@ static bool load_palette(const char* path) {
     buf_p += 2;
   }
 
-  //set label to filename
-  size_t len = strlen(path);
-  memcpy(curr_palette.name, path, len);
-  curr_palette.name[len] = 0;
+  //set label to filename (strip any directory prefix e.g. "/palette/")
+  const char* disp = strrchr(path, '/');
+  disp = disp ? disp + 1 : path;
+  size_t disp_len = strlen(disp);
+  memcpy(curr_palette.name, disp, disp_len);
+  curr_palette.name[disp_len] = 0;
   lv_label_set_text(palette_label, curr_palette.name);
 
-  save_to_sd((const uint8_t*)path, len, "/last_palette");
+  save_to_sd((const uint8_t*)path, strlen(path), "/last_palette");
 
   //display palette colors
   //we limit to 32 colors as anymore seems to cause memory issues

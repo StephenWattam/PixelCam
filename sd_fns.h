@@ -1,6 +1,7 @@
 #ifndef SD_FNS
 #define SD_FNS
 #include "globals.h"
+#include "default_palettes.h"
 
 #include "FS.h"
 #include "SD.h"
@@ -38,7 +39,11 @@ static int32_t onRead(uint32_t lba, uint32_t offset, void *buffer, uint32_t bufs
 
 static bool onStartStop(uint8_t power_condition, bool start, bool load_eject) {
   if (DEBUG) Serial.printf("MSC START/STOP: power: %u, start: %u, eject: %u\n", power_condition, start, load_eject);
-  //lvgl_unlock();
+  //Host unmounted/ejected the drive: request a reboot so the camera UI
+  //comes back without needing a manual power-cycle.
+  if (load_eject && !start) {
+    usb_reset_requested = true;
+  }
   return true;
 }
 
@@ -143,6 +148,35 @@ static void save_to_sd(const uint8_t* buf, size_t buf_sz, const char* path) {
   }
   file.flush();
   file.close();
+  sd_deactivate();
+}
+
+static void seed_default_palettes() {
+  sd_activate();
+
+  if (!SD.exists("/palette")) {
+    SD.mkdir("/palette");
+  }
+
+  char path[64];
+  for (int i = 0; i < NUM_DEFAULT_PALETTES; ++i) {
+    strcpy(path, "/palette/");
+    strcat(path, default_palettes[i].name);
+    //don't clobber palettes the user already has on the card
+    if (SD.exists(path)) continue;
+    File f = SD.open(path, FILE_WRITE);
+    if (!f) {
+      Serial.print("Failed to seed palette: ");
+      Serial.println(path);
+      continue;
+    }
+    f.print(default_palettes[i].data);
+    f.flush();
+    f.close();
+    Serial.print("Seeded default palette: ");
+    Serial.println(path);
+  }
+
   sd_deactivate();
 }
 

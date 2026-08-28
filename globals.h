@@ -105,6 +105,9 @@ static bool capture_pressed = false; //true when capture button is pressed, back
 static uint8_t* processed_img_disp_buf = nullptr;
 static bool showing_captured = false;
 
+//set true from the USB MSC eject callback; loop() reboots when it sees this
+static volatile bool usb_reset_requested = false;
+
 //camera params page ui objects
 static lv_obj_t * wb_label;
 

@@ -57,6 +57,16 @@ static void init_palette_ui() {
       sd_deactivate();
       return;
     }
+
+    //skip hidden files (e.g. macOS "._" / ".Trashes" entries)
+    const char* fname = file.name();
+    const char* base = strrchr(fname, '/');
+    base = base ? base + 1 : fname;
+    if (base[0] == '.') {
+      file.close();
+      continue;
+    }
+
     lv_obj_t* btn = lv_btn_create(list);
     lv_obj_align(btn, LV_ALIGN_LEFT_MID,0,0);
     lv_obj_add_event_cb(btn, on_choose_palette, LV_EVENT_CLICKED, NULL);
