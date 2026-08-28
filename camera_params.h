@@ -19,8 +19,9 @@ static void save_settings() {
   buf[9] = 0; //unused
   buf[10] = (int8_t)dither_pattern;
   buf[11] = (int8_t)dither_strength;
-  buf[12] = 0; //unused
-  save_to_sd((uint8_t*)buf, 12, "/settings");
+  buf[12] = (int8_t)info->status.vflip;
+  buf[13] = (int8_t)info->status.hmirror;
+  save_to_sd((uint8_t*)buf, 14, "/settings");
 }
 
 static void load_settings() {
@@ -39,6 +40,8 @@ static void load_settings() {
   if (sz > 8 && info->set_wb_mode) info->set_wb_mode(info, buf[8]);
   if (sz > 10) dither_pattern = buf[10];
   if (sz > 11) dither_strength = buf[11];
+  if (sz > 12 && info->set_vflip) info->set_vflip(info, buf[12]);
+  if (sz > 13 && info->set_hmirror) info->set_hmirror(info, buf[13]);
   free(buf);
 }
 
@@ -134,6 +137,26 @@ static void on_dither_patt(lv_event_t* e) {
   dither_pattern = lv_slider_get_value(slider);
   Serial.println("on_dither_patt");
   save_settings();
+}
+
+static void on_vflip(lv_event_t* e) {
+  lv_obj_t* cb = lv_event_get_target(e);
+  sensor_t * info = esp_camera_sensor_get();
+  if (info->set_vflip) {
+    info->set_vflip(info, lv_obj_has_state(cb, LV_STATE_CHECKED) ? 1 : 0);
+    Serial.println("on_vflip");
+    save_settings();
+  }
+}
+
+static void on_hmirror(lv_event_t* e) {
+  lv_obj_t* cb = lv_event_get_target(e);
+  sensor_t * info = esp_camera_sensor_get();
+  if (info->set_hmirror) {
+    info->set_hmirror(info, lv_obj_has_state(cb, LV_STATE_CHECKED) ? 1 : 0);
+    Serial.println("on_hmirror");
+    save_settings();
+  }
 }
 
 static void update_wb_label(uint8_t mode) {
@@ -293,6 +316,18 @@ static void init_settings_page() {
   wb_label = lv_label_create(list);
   lv_obj_align_to(wb_label, slider, LV_ALIGN_OUT_TOP_MID, 0, -30);
   update_wb_label(info->status.wb_mode);
+  lv_list_add_text(list, "");
+
+  cb = lv_checkbox_create(list);
+  lv_checkbox_set_text(cb, "Flip Vertical");
+  if (info->status.vflip) lv_obj_add_state(cb, LV_STATE_CHECKED);
+  lv_obj_add_event_cb(cb, on_vflip, LV_EVENT_VALUE_CHANGED, NULL);
+  lv_list_add_text(list, "");
+
+  cb = lv_checkbox_create(list);
+  lv_checkbox_set_text(cb, "Mirror Horizontal");
+  if (info->status.hmirror) lv_obj_add_state(cb, LV_STATE_CHECKED);
+  lv_obj_add_event_cb(cb, on_hmirror, LV_EVENT_VALUE_CHANGED, NULL);
   lv_list_add_text(list, "");
 }
 
