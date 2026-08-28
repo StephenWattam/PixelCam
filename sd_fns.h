@@ -147,6 +147,11 @@ static void save_to_sd(const uint8_t* buf, size_t buf_sz, const char* path) {
 }
 
 static void save_to_sd(camera_fb_t * pic) {
+  if (!pic) {
+    Serial.println("Failed to get camera buffer");
+    return;
+  }
+
   lvgl_lock(-1);
   sd_active = true;
   uint index = curr_file_index+1;
@@ -154,18 +159,22 @@ static void save_to_sd(camera_fb_t * pic) {
   size_t width = pic->width;
   size_t height = pic->height;
   size_t rgb888_buf_sz = width*height*3*sizeof(uint8_t);
-  if (!pic) {
-    Serial.println("Failed to get camera buffer");
+
+  uint8_t* rgb888buf = (uint8_t*)malloc(rgb888_buf_sz);
+  if (!rgb888buf) {
+    Serial.println("Failed to allocate rgb888 buffer");
     sd_active = false;
+    lvgl_unlock();
     return;
   }
-  uint8_t* rgb888buf = (uint8_t*)malloc(rgb888_buf_sz);
+
   bool res = fmt2rgb888(pic->buf, pic->len, pic->format, rgb888buf);
   //esp_camera_fb_return(pic);
   if (!res) {
     free(rgb888buf);
     Serial.println("Failed to convert to rgb888");
     sd_active = false;
+    lvgl_unlock();
     return;
   }
 
@@ -174,6 +183,12 @@ static void save_to_sd(camera_fb_t * pic) {
 
   uint8_t* scaled_buf = scale(rgb888buf, width, height);
   free(rgb888buf);
+  if (!scaled_buf) {
+    Serial.println("Failed to allocate scaled buffer");
+    sd_active = false;
+    lvgl_unlock();
+    return;
+  }
 
   uint8_t* jpg_buf;
   size_t jpg_buf_sz;
@@ -182,6 +197,7 @@ static void save_to_sd(camera_fb_t * pic) {
     free(scaled_buf);
     Serial.println("Failed to convert to jpg");
     sd_active = false;
+    lvgl_unlock();
     return;
   }
   free(scaled_buf);
